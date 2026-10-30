@@ -37,7 +37,7 @@ export default function ChatThread() {
       await sendSupportMessage(clientId, body)
       setText('')
     } catch (err) {
-      setError(err?.message || 'Message send nahi hua')
+      setError(err?.message || 'Failed to send message')
     } finally {
       setSending(false)
     }
@@ -45,48 +45,33 @@ export default function ChatThread() {
 
   return (
     <AppShell
-      title={`Chat · ${name}`}
-      subtitle="Real-time support messaging"
+      title={name}
+      subtitle="Live Chat"
       back
       nav={false}
       right={
         userComplaints.length > 0 ? (
           <Link className="btn secondary sm" to={userTo}>
-            <Icon name="grid" size={15} />
-            <span>Complaints ({userComplaints.length})</span>
+            <Icon name="grid" size={14} />
+            <span>Complaint</span>
           </Link>
         ) : null
       }
     >
-      <div className="chat-shell">
-        {/* Chat Topbar */}
-        <div className="chat-topbar">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div className="admin-avatar" style={{ width: 36, height: 36, fontSize: '0.85rem' }}>
-              {initialsOf(name)}
-            </div>
-            <div>
-              <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)' }}>{name}</div>
-              <div style={{ fontSize: '0.74rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-                <span>Client ID: {String(clientId || '').slice(0, 8)}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Message List */}
-        <div className="chat-list">
+      <div className="pa-chat-wrap">
+        {/* Messages Card */}
+        <div className="pa-chat-box">
           {loading ? (
-            <div className="empty-state" style={{ padding: '30px' }}>
-              <h2>Loading messages…</h2>
+            <div className="pa-empty" style={{ padding: 24 }}>
+              <span className="pa-empty-title">Loading messages…</span>
             </div>
           ) : rows.length === 0 ? (
-            <div className="empty-state" style={{ padding: '30px' }}>
-              <div className="empty-icon">
+            <div className="pa-empty" style={{ padding: 24 }}>
+              <div className="pa-empty-icon">
                 <Icon name="message" size={24} />
               </div>
-              <p>Is user ne abhi tak koi message nahi bheja hai.</p>
+              <strong className="pa-empty-title">No Messages Yet</strong>
+              <p className="pa-empty-text">Type a message below to start chatting.</p>
             </div>
           ) : (
             rows.map((m) => {
@@ -94,23 +79,16 @@ export default function ChatThread() {
               const stamp = formatStamp(m.createdAt)
 
               return (
-                <div key={m.id} className={`chat-bubble-row ${mine ? 'mine' : 'theirs'}`}>
-                  <div className="chat-bubble">
-                    {m.text && <div className="chat-text">{m.text}</div>}
+                <div key={m.id} className={`pa-msg-row ${mine ? 'mine' : 'theirs'}`}>
+                  <div className="pa-bubble">
+                    {m.text && <div>{m.text}</div>}
                     {m.file?.name && (
-                      <div className="chat-file-card" style={{ background: mine ? 'rgba(0,0,0,0.1)' : '#252a36' }}>
-                        <span className="chat-file-icon">
-                          <Icon name="folder" size={16} />
-                        </span>
-                        <div className="chat-file-meta">
-                          <div className="chat-file-name">{m.file.name}</div>
-                        </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8rem', opacity: 0.9 }}>
+                        <Icon name="folder" size={14} />
+                        <span>{m.file.name}</span>
                       </div>
                     )}
-                    <div className="chat-meta">
-                      <span>{stamp.time}</span>
-                      {m.edited && <span>· edited</span>}
-                    </div>
+                    <span className="pa-bubble-time">{stamp.time}</span>
                   </div>
                 </div>
               )
@@ -119,19 +97,17 @@ export default function ChatThread() {
           <div ref={bottomRef} />
         </div>
 
-        {/* Error notification */}
         {error && (
-          <div style={{ background: 'var(--no-soft)', color: 'var(--no)', padding: '8px 14px', fontSize: '0.82rem' }}>
+          <div style={{ background: 'var(--no-soft)', color: 'var(--no)', padding: '8px 12px', borderRadius: 8, fontSize: '0.8rem' }}>
             {error}
           </div>
         )}
 
-        {/* Input Bar matching Parimatch Site */}
-        <form className="chat-inputbar" onSubmit={send}>
+        {/* Input Bar with Blue Send Button */}
+        <form className="pa-chat-bar" onSubmit={send}>
           <input
-            className="chat-input"
             type="text"
-            placeholder="Type support reply…"
+            placeholder="Type your reply…"
             value={text}
             onChange={(e) => setText(e.target.value)}
             disabled={sending}
@@ -140,11 +116,11 @@ export default function ChatThread() {
           />
           <button
             type="submit"
-            className="btn primary"
-            style={{ height: 42, padding: '0 18px' }}
+            className="btn primary sm"
             disabled={!text.trim() || sending}
+            style={{ padding: '0 16px', height: 36 }}
           >
-            <Icon name="send" size={16} />
+            <Icon name="send" size={15} />
             <span>Send</span>
           </button>
         </form>

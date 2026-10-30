@@ -6,7 +6,7 @@ import { useData } from '../App.jsx'
 import { groupUsers } from '../lib/data.js'
 
 const STATUS_FILTERS = [
-  { id: 'all', label: 'All Users' },
+  { id: 'all', label: 'All' },
   { id: 'pending', label: 'Pending' },
   { id: 'resolved', label: 'Resolved' },
   { id: 'rejected', label: 'Rejected' },
@@ -37,17 +37,14 @@ export default function AllComplains() {
   }, [complaints, q, statusFilter])
 
   return (
-    <AppShell
-      title="All Complains"
-      subtitle={`${rows.length} users (${complaints.length} total complaints)`}
-    >
-      <div className="card" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* Search Bar matching Parimatch Site */}
-        <div className="search-bar">
-          <Icon name="search" size={18} />
+    <AppShell title="All Complains">
+      {/* Search & Filter Header Box */}
+      <div className="pa-card" style={{ gap: 10, padding: 12 }}>
+        <div className="pa-search-input">
+          <Icon name="search" size={17} style={{ color: 'var(--muted)', flexShrink: 0 }} />
           <input
             type="search"
-            placeholder="Search by user name, mobile, email or complaint type…"
+            placeholder="Search name, phone, type…"
             value={q}
             onChange={(e) => setQ(e.target.value)}
           />
@@ -55,20 +52,19 @@ export default function AllComplains() {
             <button
               type="button"
               onClick={() => setQ('')}
-              style={{ background: 'none', border: 0, color: 'var(--muted)', cursor: 'pointer' }}
+              style={{ background: 'none', border: 0, color: 'var(--muted)', cursor: 'pointer', padding: 4 }}
             >
-              <Icon name="x" size={16} />
+              <Icon name="x" size={15} />
             </button>
           )}
         </div>
 
-        {/* Filter Tabs */}
-        <div className="filter-tabs">
+        <div className="pa-filter-row">
           {STATUS_FILTERS.map((f) => (
             <button
               key={f.id}
               type="button"
-              className={`filter-tab ${statusFilter === f.id ? 'active' : ''}`}
+              className={`pa-filter-pill ${statusFilter === f.id ? 'active' : ''}`}
               onClick={() => setStatusFilter(f.id)}
             >
               {f.label}
@@ -77,29 +73,33 @@ export default function AllComplains() {
         </div>
       </div>
 
-      {/* User Complaints List */}
-      <div className="card" style={{ padding: '20px' }}>
+      {/* Complaints User List */}
+      <div className="pa-card">
+        <div className="pa-card-head">
+          <h2 className="pa-card-title">Users List ({rows.length})</h2>
+        </div>
+
         {loading ? (
-          <div className="empty-state">
-            <h2>Loading…</h2>
-            <p>Fetching complaints list.</p>
+          <div className="pa-empty">
+            <span className="pa-empty-title">Loading…</span>
           </div>
         ) : rows.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">
-              <Icon name="search" size={28} />
+          <div className="pa-empty">
+            <div className="pa-empty-icon">
+              <Icon name="search" size={24} />
             </div>
-            <h2>Koi complaint nahi mili</h2>
-            <p>
-              {q || statusFilter !== 'all'
-                ? `"${q || statusFilter}" ke mutabiq koi record nahi mila.`
-                : 'Abhi tak koi user complaint database me darj nahi hai.'}
-            </p>
+            <strong className="pa-empty-title">No Complains Found</strong>
+            <p className="pa-empty-text">No matching records found.</p>
           </div>
         ) : (
-          <div className="admin-list">
+          <div className="pa-list">
             {rows.map((u) => (
-              <UserRow key={u.clientId} user={u} to={`/user/${u.clientId}`} badge={u.total} />
+              <UserRow
+                key={u.clientId}
+                user={u}
+                to={`/user/${u.clientId}`}
+                badge={u.total}
+              />
             ))}
           </div>
         )}

@@ -11,23 +11,25 @@ export default function UserRow({ user, to, badge = 0 }) {
   const complaintType = user.latestType || user.type || 'Complain'
 
   return (
-    <Link className="admin-row" to={fullTo}>
-      <div className="admin-avatar">
+    <Link className="pa-row-item" to={fullTo}>
+      <div className="pa-avatar">
         {initialsOf(user.name)}
       </div>
 
-      <div className="admin-row-meta">
-        <strong className="admin-row-name">{user.name}</strong>
-        <div className="admin-row-sub">
-          <span className="badge accent">{complaintType}</span>
-          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{formatDateTime(user.lastAt || user.at)}</span>
-          {badge > 1 && <span className="badge info">+{badge - 1} more</span>}
+      <div className="pa-row-info">
+        <strong className="pa-row-name">{user.name}</strong>
+        <div className="pa-row-sub">
+          <span className="pa-badge blue">{complaintType}</span>
+          <span>{formatDateTime(user.lastAt || user.at)}</span>
+          {badge > 1 && (
+            <span style={{ fontSize: '0.7rem', color: 'var(--muted)', fontWeight: 600 }}>
+              +{badge - 1} more
+            </span>
+          )}
         </div>
       </div>
 
-      <div className="admin-row-right">
-        <Icon name="chevron-right" size={18} className="icon-chevron" />
-      </div>
+      <Icon name="chevron-right" size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
     </Link>
   )
 }

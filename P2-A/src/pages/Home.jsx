@@ -13,63 +13,63 @@ export default function Home() {
   const todayCount = todays.reduce((n, u) => n + u.todayCount, 0)
 
   const stats = [
-    { id: 'today', label: 'Aaj ki complaints', value: todayCount, delta: 'Today', icon: 'bell' },
-    { id: 'users', label: 'Total users', value: users.length, delta: 'Active', icon: 'user' },
-    { id: 'all', label: 'Total complaints', value: complaints.length, delta: 'All time', icon: 'grid' },
-    { id: 'chat', label: 'Chat messages', value: messages.length, delta: 'Live', icon: 'message' },
+    { id: 'today', label: 'Today Complains', value: todayCount, icon: 'bell' },
+    { id: 'users', label: 'Active Users', value: users.length, icon: 'user' },
+    { id: 'all', label: 'Total Complains', value: complaints.length, icon: 'grid' },
+    { id: 'chat', label: 'Chat Messages', value: messages.length, icon: 'message' },
   ]
 
   return (
-    <AppShell title="Dashboard Overview" subtitle="Real-time complaints and user status">
-      {/* 4 Stat Boxes */}
-      <div className="stats-grid">
+    <AppShell title="Dashboard">
+      {/* 2x2 Clean Stats Grid */}
+      <div className="pa-stats-grid">
         {stats.map((s) => (
-          <div key={s.id} className="stat-box">
-            <div className="stat-top">
-              <span className="stat-icon">
-                <Icon name={s.icon} size={18} />
+          <div key={s.id} className="pa-stat-box">
+            <div className="pa-stat-top">
+              <span className="pa-stat-lbl">{s.label}</span>
+              <span className="pa-stat-icon">
+                <Icon name={s.icon} size={16} />
               </span>
-              <span className="stat-tag">{s.delta}</span>
             </div>
-            <div className="stat-num">{s.value}</div>
-            <div className="stat-label">{s.label}</div>
+            <div className="pa-stat-val">{s.value}</div>
           </div>
         ))}
       </div>
 
-      {/* Today's Users Section */}
-      <div className="card" style={{ padding: '20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <div>
-            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text)' }}>
-              Aaj ke users ({todays.length})
-            </h2>
-            <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: 2 }}>
-              Sirf aaj submit ki gayi complaints wale users
-            </p>
-          </div>
-          {todays.length > 0 && (
-            <span className="badge accent">{todayCount} complaints today</span>
+      {/* Today's Users Card */}
+      <div className="pa-card">
+        <div className="pa-card-head">
+          <h2 className="pa-card-title">
+            Today Users ({todays.length})
+          </h2>
+          {todayCount > 0 && (
+            <span className="pa-badge blue">
+              {todayCount} new
+            </span>
           )}
         </div>
 
         {loading ? (
-          <div className="empty-state" style={{ padding: '30px' }}>
-            <h2>Loading…</h2>
-            <p>Fetching today's activity.</p>
+          <div className="pa-empty">
+            <span className="pa-empty-title">Loading…</span>
           </div>
         ) : todays.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">
-              <Icon name="user" size={28} />
+          <div className="pa-empty">
+            <div className="pa-empty-icon">
+              <Icon name="user" size={24} />
             </div>
-            <h2>Aaj koi complaint nahi</h2>
-            <p>Aaj ke din abhi tak koi nayi user complaint nahi aayi hai. Jaise hi user submit karega, yahan turant live dikhegi.</p>
+            <strong className="pa-empty-title">No Complains Today</strong>
+            <p className="pa-empty-text">Today no new complains submitted.</p>
           </div>
         ) : (
-          <div className="admin-list">
+          <div className="pa-list">
             {todays.map((u) => (
-              <UserRow key={u.clientId} user={u} to={`/user/${u.clientId}`} badge={u.todayCount} />
+              <UserRow
+                key={u.clientId}
+                user={u}
+                to={`/user/${u.clientId}`}
+                badge={u.todayCount}
+              />
             ))}
           </div>
         )}

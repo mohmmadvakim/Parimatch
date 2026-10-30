@@ -14,49 +14,49 @@ export default function ChatManage() {
   const base = pathname.startsWith('/admin') ? '/admin' : ''
 
   return (
-    <AppShell
-      title="Live Chat Manager"
-      subtitle={`${rows.length} conversations active`}
-    >
-      <div className="card" style={{ padding: '20px' }}>
+    <AppShell title="Live Chat">
+      <div className="pa-card">
+        <div className="pa-card-head">
+          <h2 className="pa-card-title">Conversations ({rows.length})</h2>
+        </div>
+
         {loading ? (
-          <div className="empty-state">
-            <h2>Loading…</h2>
-            <p>Fetching active chat threads.</p>
+          <div className="pa-empty">
+            <span className="pa-empty-title">Loading…</span>
           </div>
         ) : rows.length === 0 ? (
-          <div className="empty-state">
-            <div className="empty-icon">
-              <Icon name="message" size={28} />
+          <div className="pa-empty">
+            <div className="pa-empty-icon">
+              <Icon name="message" size={24} />
             </div>
-            <h2>Koi active chat nahi hai</h2>
-            <p>Jab koi user Parimatch Support live chat me message karega, uska chat session yahan turant aa jayega.</p>
+            <strong className="pa-empty-title">No Active Chats</strong>
+            <p className="pa-empty-text">No user chat messages found yet.</p>
           </div>
         ) : (
-          <div className="admin-list">
+          <div className="pa-list">
             {rows.map((u) => {
               const stamp = formatStamp(u.lastAt)
               const mine = u.lastSender !== 'user'
               const chatTo = base ? `${base}/chat/${u.clientId}` : `/chat/${u.clientId}`
 
               return (
-                <Link key={u.clientId} className="admin-row" to={chatTo}>
-                  <div className="admin-avatar">
+                <Link key={u.clientId} className="pa-row-item" to={chatTo}>
+                  <div className="pa-avatar">
                     {initialsOf(u.name)}
                   </div>
 
-                  <div className="admin-row-meta">
-                    <strong className="admin-row-name">{u.name}</strong>
-                    <div className="admin-row-sub">
-                      <span>{mine ? 'You: ' : ''}{u.lastText || 'Attachment'}</span>
-                      <span style={{ fontVariantNumeric: 'tabular-nums' }}>• {stamp.date} {stamp.time}</span>
+                  <div className="pa-row-info">
+                    <strong className="pa-row-name">{u.name}</strong>
+                    <div className="pa-row-sub">
+                      <span>{mine ? 'You: ' : ''}{u.lastText || 'Message'}</span>
+                      <span>• {stamp.time}</span>
                     </div>
                   </div>
 
-                  <div className="admin-row-right">
-                    <span className="badge accent">{u.count} msg</span>
-                    <Icon name="chevron-right" size={18} />
-                  </div>
+                  <span className="pa-badge blue" style={{ flexShrink: 0 }}>
+                    {u.count}
+                  </span>
+                  <Icon name="chevron-right" size={18} style={{ color: '#94a3b8', flexShrink: 0 }} />
                 </Link>
               )
             })}
