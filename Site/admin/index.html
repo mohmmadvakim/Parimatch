@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | Admin-Parimatch</title>
+  <link rel="icon" type="image/png" href="../public/logo/logo.png" />
+  <link rel="stylesheet" href="../src/own-library.css" />
+  <link rel="stylesheet" href="../src/index.css" />
+</head>
+<body>
+  <header class="page-header">
+    <div class="header-inner">
+      <img class="logo-icon" src="../public/logo/logo.png" alt="Parimatch logo" />
+      <div class="logo-text">Admin-Parimatch</div>
+      <button class="menu-btn" id="menuButton" type="button" aria-label="Menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <line x1="3" y1="12" x2="21" y2="12" />
+          <line x1="3" y1="18" x2="21" y2="18" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="menu-overlay" id="menuOverlay"></div>
+  <nav class="side-menu" id="sideMenu" aria-label="Admin menu">
+    <div class="side-menu-head">
+      <img src="../public/logo/logo.png" alt="" />
+      <span>Admin-Parimatch</span>
+      <button class="side-close" id="menuClose" type="button" aria-label="Close menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
+      </button>
+    </div>
+    <a class="side-link active" href="index.html">Home</a>
+  </nav>
+
+  <main class="container">
+    <section class="card panel">
+      <h1 class="page-title" style="margin-bottom: 4px;">Today's Complains</h1>
+      <p class="page-sub" style="margin-bottom: 0;">Tap a complain to view its details.</p>
+    </section>
+
+    <section id="complaintList" class="container" style="padding: 0;" aria-label="Today's complaints"></section>
+  </main>
+
+  <div class="overlay" id="complaintOverlay" role="presentation">
+    <section class="modal wide" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+      <div class="modal-head">
+        <div class="modal-icon accent" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+          </svg>
+        </div>
+        <div class="modal-title">
+          <h3 id="detailTitle">Complain Details</h3>
+          <p id="detailSubtitle"></p>
+        </div>
+        <button class="modal-close" id="detailClose" type="button" aria-label="Close details">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <dl class="kv" id="detailFields"></dl>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" id="detailDone" type="button">Close</button>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <div class="footer-main">
+      <p>&copy; 2026 Admin-Parimatch. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    const todayAt = (hour, minute) => {
+      const date = new Date();
+      date.setHours(hour, minute, 0, 0);
+      return date.toISOString();
+    };
+
+    const complaints = [
+      {
+        id: 'CMP-1001',
+        userName: 'Rahul Sharma',
+        mobile: '98765 43210',
+        email: 'rahul@example.com',
+        type: 'Deposit',
+        amount: '₹2,000',
+        message: 'Payment deducted but balance is not updated.',
+        status: 'pending',
+        createdAt: todayAt(10, 30),
+      },
+      {
+        id: 'CMP-1002',
+        userName: 'Amit Verma',
+        mobile: '91234 56780',
+        email: 'amit@example.com',
+        type: 'Withdrawal',
+        amount: '₹5,000',
+        message: 'Withdrawal has not reached my bank account.',
+        status: 'resolved',
+        createdAt: todayAt(12, 15),
+      },
+      {
+        id: 'CMP-1003',
+        userName: 'Priya Singh',
+        mobile: '99887 76655',
+        email: 'priya@example.com',
+        type: 'KYC',
+        amount: '',
+        message: 'My KYC document needs to be reviewed.',
+        status: 'pending',
+        createdAt: todayAt(14, 45),
+      },
+    ];
+
+    const complaintList = document.getElementById('complaintList');
+    const complaintOverlay = document.getElementById('complaintOverlay');
+    const detailTitle = document.getElementById('detailTitle');
+    const detailSubtitle = document.getElementById('detailSubtitle');
+    const detailFields = document.getElementById('detailFields');
+    let lastOpenedCard = null;
+
+    const statusTone = (status) => status === 'resolved' ? 'success' : 'warning';
+    const statusLabel = (status) => status.charAt(0).toUpperCase() + status.slice(1);
+    const formatTime = (date) => new Date(date).toLocaleTimeString('en-IN', {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+    const formatDate = (date) => new Date(date).toLocaleString('en-IN', {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
+
+    complaintList.innerHTML = complaints.map((complaint) => `
+      <article
+        class="card complain-item"
+        data-complaint-id="${complaint.id}"
+        role="button"
+        tabindex="0"
+        aria-label="View ${complaint.userName}'s ${complaint.type} complain"
+        style="cursor: pointer;"
+      >
+        <span class="complain-status ${statusTone(complaint.status)}">${statusLabel(complaint.status)}</span>
+        <div class="complain-item-head">
+          <span class="badge info">${complaint.type}</span>
+          <time class="complain-item-date" datetime="${complaint.createdAt}">${formatTime(complaint.createdAt)}</time>
+        </div>
+        <h2 class="complain-item-title">${complaint.userName}</h2>
+        <div class="complain-details-grid">
+          <div class="complain-detail">
+            <span class="complain-detail-label">Mobile Number</span>
+            <span class="complain-detail-value">${complaint.mobile}</span>
+          </div>
+          ${complaint.amount ? `
+            <div class="complain-detail">
+              <span class="complain-detail-label">Amount</span>
+              <span class="complain-detail-value">${complaint.amount}</span>
+            </div>
+          ` : ''}
+        </div>
+        <div class="complain-item-foot">
+          <span class="complain-item-id">ID: ${complaint.id}</span>
+          <span class="complain-item-date">Tap for details</span>
+        </div>
+      </article>
+    `).join('');
+
+    function openComplaint(id, card) {
+      const complaint = complaints.find((item) => item.id === id);
+      if (!complaint) return;
+
+      lastOpenedCard = card;
+      detailTitle.textContent = `${complaint.type} Complain`;
+      detailSubtitle.textContent = `${complaint.id} · ${formatDate(complaint.createdAt)}`;
+
+      const fields = [
+        ['User Name', complaint.userName],
+        ['Mobile Number', complaint.mobile],
+        ['E-mail ID', complaint.email],
+        ['Complain Type', complaint.type],
+        ['Amount', complaint.amount || '-'],
+        ['Message', complaint.message],
+        ['Status', statusLabel(complaint.status)],
+      ];
+      detailFields.innerHTML = fields.map(([label, value]) => `
+        <dt>${label}</dt>
+        <dd>${value}</dd>
+      `).join('');
+
+      complaintOverlay.classList.add('open');
+      document.body.classList.add('no-scroll');
+      document.getElementById('detailClose').focus();
+    }
+
+    function closeComplaint() {
+      complaintOverlay.classList.remove('open');
+      document.body.classList.remove('no-scroll');
+      if (lastOpenedCard) lastOpenedCard.focus();
+    }
+
+    document.querySelectorAll('[data-complaint-id]').forEach((card) => {
+      card.addEventListener('click', () => openComplaint(card.dataset.complaintId, card));
+      card.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          openComplaint(card.dataset.complaintId, card);
+        }
+      });
+    });
+
+    document.getElementById('detailClose').addEventListener('click', closeComplaint);
+    document.getElementById('detailDone').addEventListener('click', closeComplaint);
+    complaintOverlay.addEventListener('click', (event) => {
+      if (event.target === complaintOverlay) closeComplaint();
+    });
+
+    const menuButton = document.getElementById('menuButton');
+    const menuOverlay = document.getElementById('menuOverlay');
+    const sideMenu = document.getElementById('sideMenu');
+    const menuClose = document.getElementById('menuClose');
+
+    function setMenu(open) {
+      menuOverlay.classList.toggle('open', open);
+      sideMenu.classList.toggle('open', open);
+      menuButton.setAttribute('aria-expanded', String(open));
+      if (open) menuClose.focus();
+      else menuButton.focus();
+    }
+
+    menuButton.addEventListener('click', () => setMenu(true));
+    menuClose.addEventListener('click', () => setMenu(false));
+    menuOverlay.addEventListener('click', () => setMenu(false));
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') return;
+      if (complaintOverlay.classList.contains('open')) closeComplaint();
+      if (sideMenu.classList.contains('open')) setMenu(false);
+    });
+  </script>
+</body>
+</html>
