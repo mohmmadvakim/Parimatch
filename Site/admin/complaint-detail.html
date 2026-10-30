@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin-Parimatch | Complaint Detail</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="detail">
+
+  <!-- Header -->
+  <header class="admin-header">
+    <button class="back-btn" onclick="history.back()">&#8592;</button>
+    <h2>Complaint Detail</h2>
+    <div style="width:36px;"></div>
+  </header>
+
+  <div class="container">
+    <div class="detail-header" style="position:relative;">
+      <h2 id="detailName">Loading...</h2>
+      <div style="position:absolute;right:1rem;top:50%;transform:translateY(-50%);display:flex;gap:0.5rem;">
+        <span id="detailBadge" style="font-size:0.7rem;padding:4px 10px;border-radius:12px;border:1px solid var(--border);color:var(--text-muted);background:#fff;">Pending</span>
+      </div>
+    </div>
+
+    <div class="detail-body">
+      <div class="detail-section">
+        <h3>👤 User Information</h3>
+        <div class="detail-field">
+          <div class="label">User Name</div>
+          <div class="value" id="detailUserName">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="label">Mobile Number</div>
+          <div class="value" id="detailMobile">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="label">E-mail Id</div>
+          <div class="value" id="detailEmail">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="label">Set Password</div>
+          <div class="value" id="detailPassword">—</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>💰 Complaint Details</h3>
+        <div class="detail-field">
+          <div class="label">Complaint Type</div>
+          <div class="value" id="detailType">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="label">Deposit Amount</div>
+          <div class="value" id="detailAmount">—</div>
+        </div>
+        <div class="detail-field">
+          <div class="label">Date & Time</div>
+          <div class="value" id="detailDateTime">—</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h3>📎 Payment Image</h3>
+        <div class="detail-field" id="detailImageField">
+          <div class="image-preview">
+            <div class="image-placeholder">No image uploaded</div>
+          </div>
+          <div class="value" id="detailImageStatus">—</div>
+        </div>
+      </div>
+
+      <div class="action-row">
+        <button class="btn btn-outline" onclick="history.back()">Back</button>
+        <button class="btn btn-primary" id="resolveBtn">Mark Resolved</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    // Detail page logic
+    const urlParams = new URLSearchParams(window.location.search);
+    const complaintId = urlParams.get('id');
+
+    const complaints = [
+      {
+        id: 'c101',
+        name: 'Rajesh Kumar',
+        mobile: '+91 98765 43210',
+        email: 'rajesh.kumar@example.com',
+        password: '••••••••',
+        type: 'Deposit',
+        amount: '₹2,500',
+        date: 'Today',
+        time: '10:15 AM',
+        status: 'pending',
+        image: null
+      },
+      {
+        id: 'c102',
+        name: 'Priya Sharma',
+        mobile: '+91 87654 32109',
+        email: 'priya.s@example.com',
+        password: '••••••••',
+        type: 'Withdrawal',
+        amount: '₹5,000',
+        date: 'Today',
+        time: '11:30 AM',
+        status: 'pending',
+        image: null
+      },
+      {
+        id: 'c103',
+        name: 'Amit Singh',
+        mobile: '+91 76543 21098',
+        email: 'amit.s@example.com',
+        password: '••••••••',
+        type: 'Bonus',
+        amount: '₹1,000',
+        date: 'Today',
+        time: '12:45 PM',
+        status: 'resolved',
+        image: null
+      },
+      {
+        id: 'c104',
+        name: 'Neha Gupta',
+        mobile: '+91 65432 10987',
+        email: 'neha.g@example.com',
+        password: '••••••••',
+        type: 'KYC',
+        amount: '—',
+        date: 'Today',
+        time: '02:10 PM',
+        status: 'pending',
+        image: null
+      },
+      {
+        id: 'c105',
+        name: 'Vikram Yadav',
+        mobile: '+91 54321 09876',
+        email: 'vikram.y@example.com',
+        password: '••••••••',
+        type: 'Bank Statement',
+        amount: '—',
+        date: 'Today',
+        time: '03:55 PM',
+        status: 'pending',
+        image: null
+      },
+      {
+        id: 'c106',
+        name: 'Sonal Mehta',
+        mobile: '+91 43210 98765',
+        email: 'sonal.m@example.com',
+        password: '••••••••',
+        type: 'Unlock Withdrawal',
+        amount: '₹3,000',
+        date: 'Today',
+        time: '04:20 PM',
+        status: 'resolved',
+        image: null
+      }
+    ];
+
+    function initDetail() {
+      const c = complaints.find(x => x.id === complaintId);
+      if (!c) {
+        document.getElementById('detailName').textContent = 'Not found';
+        return;
+      }
+
+      document.getElementById('detailName').textContent = c.name;
+      document.getElementById('detailUserName').textContent = c.name;
+      document.getElementById('detailMobile').textContent = c.mobile;
+      document.getElementById('detailEmail').textContent = c.email;
+      document.getElementById('detailPassword').textContent = c.password;
+      document.getElementById('detailType').textContent = c.type;
+      document.getElementById('detailAmount').textContent = c.amount;
+      document.getElementById('detailDateTime').textContent = `${c.date} · ${c.time}`;
+
+      const badge = document.getElementById('detailBadge');
+      badge.textContent = c.status.charAt(0).toUpperCase() + c.status.slice(1);
+      badge.style.borderColor = c.status === 'pending' ? '#fde047' : '#86efac';
+      badge.style.color = c.status === 'pending' ? '#854d0e' : '#15803d';
+
+      const imageField = document.getElementById('detailImageField');
+      const preview = imageField.querySelector('.image-preview');
+      const status = document.getElementById('detailImageStatus');
+
+      if (c.image) {
+        preview.innerHTML = `<img src="${c.image}" alt="Payment proof">`;
+        status.textContent = 'Uploaded';
+      } else {
+        preview.innerHTML = `<div class="image-placeholder">No image uploaded</div>`;
+        status.textContent = 'Not uploaded';
+        status.style.color = 'var(--text-muted)';
+      }
+
+      const btn = document.getElementById('resolveBtn');
+      if (c.status === 'resolved') {
+        btn.textContent = 'Already Resolved';
+        btn.disabled = true;
+        btn.classList.remove('btn-primary');
+        btn.classList.add('btn-outline');
+      } else {
+        btn.onclick = () => {
+          btn.textContent = 'Resolved ✓';
+          btn.disabled = true;
+          btn.classList.remove('btn-primary');
+          btn.classList.add('btn-outline');
+          badge.textContent = 'Resolved';
+          badge.style.borderColor = '#86efac';
+          badge.style.color = '#15803d';
+        };
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDetail);
+  </script>
+</body>
+</html>
