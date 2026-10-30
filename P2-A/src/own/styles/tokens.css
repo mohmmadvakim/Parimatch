@@ -7,16 +7,16 @@
 
 :root {
   /* Typography scale */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-sans: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  --fs-xs: 0.72rem;
-  --fs-sm: 0.8rem;
-  --fs-base: 0.92rem;
-  --fs-md: 1rem;
-  --fs-lg: 1.15rem;
-  --fs-xl: 1.4rem;
-  --fs-2xl: 1.9rem;
-  --lh-tight: 1.2;
+  --fs-xs: 0.74rem;
+  --fs-sm: 0.84rem;
+  --fs-base: 0.94rem;
+  --fs-md: 1.05rem;
+  --fs-lg: 1.18rem;
+  --fs-xl: 1.45rem;
+  --fs-2xl: 1.95rem;
+  --lh-tight: 1.25;
   --lh-normal: 1.55;
 
   /* Spacing scale (4px base) */
@@ -33,23 +33,23 @@
 
   /* Radius */
   --radius-xs: 4px;
-  --radius: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 16px;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 18px;
   --radius-pill: 999px;
 
   /* Component sizing */
-  --control-h-sm: 30px;
-  --control-h-md: 38px;
-  --control-h-lg: 46px;
+  --control-h-sm: 34px;
+  --control-h-md: 42px;
+  --control-h-lg: 48px;
   --icon-sm: 16px;
   --icon-md: 20px;
-  --icon-lg: 26px;
+  --icon-lg: 24px;
 
   /* Shadows */
-  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.16);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.16);
 
   /* z-index layers */
   --z-sticky: 40;

@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import AppShell from '../components/AppShell.jsx'
 import { initialsOf } from '../components/status.js'
 import { Avatar } from '../own/ui/data/Avatar.jsx'
@@ -11,29 +11,35 @@ import { useData } from '../App.jsx'
 import { chatUsers, formatStamp } from '../lib/data.js'
 
 export default function ChatManage() {
+  const { pathname } = useLocation()
   const { messages, complaints, loading } = useData()
   const rows = useMemo(() => chatUsers(messages, complaints), [messages, complaints])
 
+  const base = pathname.startsWith('/admin') ? '/admin' : ''
+
   return (
-    <AppShell title="Chat Manage" subtitle={`${rows.length} chats`}>
+    <AppShell title="Chat Manage" subtitle={`${rows.length} conversations`}>
       {loading ? (
         <div className="own-card pa-card"><Skeleton lines={4} /></div>
       ) : rows.length === 0 ? (
-        <EmptyState icon="message" title="Koi chat nahi" text="Jab user message bhejega, uska chat yahan dikhega." />
+        <div className="own-card pa-card">
+          <EmptyState icon="message" title="Koi chat nahi" text="Jab user message bhejega, uska chat yahan dikhega." />
+        </div>
       ) : (
         <div className="own-list pa-list">
           {rows.map((u) => {
             const stamp = formatStamp(u.lastAt)
             const mine = u.lastSender !== 'user'
+            const chatTo = base ? `${base}/chat/${u.clientId}` : `/chat/${u.clientId}`
             return (
-              <Link key={u.clientId} className="own-list__row pa-userrow" to={`/chat/${u.clientId}`}>
+              <Link key={u.clientId} className="own-list__row pa-userrow" to={chatTo}>
                 <Avatar initials={initialsOf(u.name)} tone="accent" size="md" />
                 <div className="own-list__meta">
                   <strong>{u.name}</strong>
                   <span>{mine ? 'You: ' : ''}{u.lastText || 'Attachment'}</span>
                   <span className="pa-userrow__time">{stamp.date} • {stamp.time}</span>
                 </div>
-                <div className="pa-stack" style={{ alignItems: 'flex-end', gap: 4 }}>
+                <div className="pa-stack" style={{ alignItems: 'flex-end', gap: 6 }}>
                   <span className="pa-userrow__time">{stamp.time}</span>
                   <Badge tone={mine ? 'neutral' : 'accent'}>{u.count}</Badge>
                 </div>

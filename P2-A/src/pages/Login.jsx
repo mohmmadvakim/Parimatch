@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import Input from '../own/ui/input/Input.jsx'
 import Button from '../own/ui/button/Button.jsx'
 import { Alert } from '../own/ui/feedback/Alert.jsx'
@@ -8,17 +8,21 @@ import { APP_NAME, DEFAULT_PASSWORD } from '../config.js'
 
 export default function Login() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [value, setValue] = useState('')
   const [error, setError] = useState('')
 
-  if (isLoggedIn()) return <Navigate to="/" replace />
+  const base = location.pathname.startsWith('/admin') ? '/admin' : ''
+
+  if (isLoggedIn()) return <Navigate to={base || '/'} replace />
 
   const submit = (e) => {
     e.preventDefault()
     if (login(value)) {
-      navigate('/', { replace: true })
+      const destination = location.state?.from || (base || '/')
+      navigate(destination, { replace: true })
     } else {
-      setError('Password galat hai')
+      setError('Password galat hai. Dobara koshish karein.')
       setValue('')
     }
   }
@@ -27,32 +31,34 @@ export default function Login() {
     <div className="pa-app pa-app--no-nav">
       <div className="pa-login">
         <div className="pa-center pa-stack" style={{ alignItems: 'center', gap: 10 }}>
-          <span className="pa-brand" style={{ fontSize: 24 }}>
-            <span className="pa-brand__dot" />
-            {APP_NAME}
+          <span className="pa-brand" style={{ fontSize: '1.4rem' }}>
+            <span className="pa-brand__badge" style={{ width: 36, height: 36, fontSize: '0.95rem' }}>P2</span>
+            <span>{APP_NAME} Admin</span>
           </span>
-          <p className="pa-muted">Support admin panel · mobile only</p>
+          <p className="pa-muted">Support Admin Panel · Secure Console</p>
         </div>
 
-        <form className="own-card pa-card" onSubmit={submit}>
-          <h2 className="pa-section__title">Admin login</h2>
+        <form className="pa-login-card" onSubmit={submit}>
+          <h2 className="pa-section__title" style={{ fontSize: '0.85rem' }}>Admin authentication</h2>
           <Input
             id="login-pass"
-            label="Password"
+            label="Admin Password"
             type="password"
             allowPasswordToggle
             icon="lock"
-            placeholder="Password"
+            placeholder="Enter password"
             value={value}
             onChange={(e) => { setValue(e.target.value); setError('') }}
             autoFocus
             autoComplete="current-password"
             error={error}
           />
-          <Button type="submit" fullWidth icon="arrow-right" disabled={!value} loading={false}>Login</Button>
+          <Button type="submit" fullWidth icon="arrow-right" disabled={!value}>
+            Login to Admin
+          </Button>
 
-          <p className="pa-muted">
-            Pehli baar? default password <code>{DEFAULT_PASSWORD}</code> — Setting page se badal sakte ho.
+          <p className="pa-muted" style={{ lineHeight: 1.5 }}>
+            Default password: <code style={{ color: 'var(--accent)', fontWeight: 700 }}>{DEFAULT_PASSWORD}</code> — Setting page se badal sakte ho.
           </p>
 
           {error ? <Alert tone="danger" title="Login fail">{error}</Alert> : null}

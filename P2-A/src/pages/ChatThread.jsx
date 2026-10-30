@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import AppShell from '../components/AppShell.jsx'
 import { initialsOf } from '../components/status.js'
 import { Avatar } from '../own/ui/data/Avatar.jsx'
@@ -15,11 +15,15 @@ import { sendSupportMessage } from '../lib/actions.js'
 
 export default function ChatThread() {
   const { clientId } = useParams()
+  const { pathname } = useLocation()
   const { complaints, messages, loading } = useData()
   const [text, setText] = useState('')
   const [sending, setSending] = useState(false)
   const [error, setError] = useState('')
   const bottomRef = useRef(null)
+
+  const base = pathname.startsWith('/admin') ? '/admin' : ''
+  const userTo = base ? `${base}/user/${clientId}` : `/user/${clientId}`
 
   const rows = useMemo(() => messagesOf(messages, clientId), [messages, clientId])
   const userComplaints = useMemo(() => complaints.filter((c) => c.clientId === clientId), [complaints, clientId])
@@ -53,17 +57,20 @@ export default function ChatThread() {
       nav={false}
       right={
         userComplaints.length ? (
-          <Link className="own-btn own-btn--ghost own-btn--sm" to={`/user/${clientId}`}>
-            <Icon name="grid" size={15} /><span>Complains</span>
+          <Link className="own-btn own-btn--secondary own-btn--sm" to={userTo}>
+            <Icon name="grid" size={15} />
+            <span>Complains</span>
           </Link>
         ) : null
       }
     >
       <div className="pa-chat">
         {loading ? (
-          <div className="pa-center"><Spinner label="Load ho raha hai" /></div>
+          <div className="pa-card pa-center"><Spinner label="Loading conversation…" /></div>
         ) : rows.length === 0 ? (
-          <EmptyState icon="message" title="Koi message nahi" text="Is user ne abhi koi message nahi bheja." />
+          <div className="pa-card">
+            <EmptyState icon="message" title="Koi message nahi" text="Is user ne abhi koi message nahi bheja." />
+          </div>
         ) : (
           rows.map((m) => {
             const mine = m.sender !== 'user'
@@ -74,7 +81,9 @@ export default function ChatThread() {
                 <div className={`pa-bubble ${mine ? 'pa-bubble--mine' : 'pa-bubble--theirs'}`}>
                   {m.text ? <span>{m.text}</span> : null}
                   {m.file?.name ? (
-                    <span className="pa-muted"><Icon name="folder" size={12} /> {m.file.name}</span>
+                    <span className="pa-muted" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                      <Icon name="folder" size={13} /> {m.file.name}
+                    </span>
                   ) : null}
                   <span className="pa-bubble__time">{stamp.time}{m.edited ? ' · edited' : ''}</span>
                 </div>
@@ -85,7 +94,11 @@ export default function ChatThread() {
         <div ref={bottomRef} />
       </div>
 
-      {error ? <div className="pa-composer__error"><Alert tone="danger" title="Send fail">{error}</Alert></div> : null}
+      {error ? (
+        <div className="pa-composer__error">
+          <Alert tone="danger" title="Send fail">{error}</Alert>
+        </div>
+      ) : null}
 
       <form className="pa-composer" onSubmit={send}>
         <Input
@@ -95,6 +108,7 @@ export default function ChatThread() {
           onChange={(e) => setText(e.target.value)}
           maxLength={2000}
           aria-label="Reply"
+          disabled={sending}
         />
         <IconButton
           icon="send"

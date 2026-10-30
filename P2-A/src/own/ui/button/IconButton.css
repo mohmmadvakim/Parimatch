@@ -15,9 +15,12 @@
 .own-iconbtn--md { width: 40px; height: 40px; }
 .own-iconbtn--lg { width: 46px; height: 46px; }
 
-.own-iconbtn--plain:hover { border-color: var(--accent); color: var(--accent); }
+.own-iconbtn:disabled { opacity: 0.45; cursor: not-allowed; pointer-events: none; }
+.own-iconbtn--primary,
 .own-iconbtn--filled { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
-.own-iconbtn--filled:hover { filter: brightness(1.05); }
+.own-iconbtn--primary:hover:not(:disabled),
+.own-iconbtn--filled:hover:not(:disabled) { filter: brightness(1.08); }
+.own-iconbtn--plain:hover { border-color: var(--accent); color: var(--accent); }
 .own-iconbtn--soft { background: var(--accent-soft); border-color: transparent; color: var(--accent); }
 .own-iconbtn--soft:hover { border-color: var(--accent); }
 .own-iconbtn--ghost { border-color: transparent; background: transparent; color: var(--muted); }

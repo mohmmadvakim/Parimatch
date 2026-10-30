@@ -1,8 +1,27 @@
 @import './tokens.css';
 
+/* Core UI component styles */
+@import '../ui/layout/ListLayout.css';
+@import '../ui/navigation/BottomNav.css';
+@import '../ui/data/StatCard.css';
+@import '../ui/data/KeyValue.css';
+@import '../ui/data/Timeline.css';
+@import '../ui/feedback/Alert.css';
+@import '../ui/feedback/EmptyState.css';
+@import '../ui/feedback/Loaders.css';
+@import '../ui/feedback/Modal.css';
+@import '../ui/button/Button.css';
+@import '../ui/button/IconButton.css';
+@import '../ui/input/Input.css';
+@import '../ui/data/Avatar.css';
+
 * { box-sizing: border-box; }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 body {
   margin: 0;
@@ -15,22 +34,23 @@ body {
   transition: background var(--t-base), color var(--t-base);
 }
 
-h1, h2, h3, h4 { margin: 0; line-height: var(--lh-tight); letter-spacing: -0.01em; }
+h1, h2, h3, h4 { margin: 0; line-height: var(--lh-tight); letter-spacing: -0.01em; color: var(--text); }
 p { margin: 0; }
-a { color: inherit; }
+a { color: inherit; text-decoration: none; }
 button { font-family: inherit; }
-ul { margin: 0; padding: 0; list-style: none; }
+ul, ol { margin: 0; padding: 0; list-style: none; }
 
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-::selection { background: var(--accent-soft); }
+::selection { background: var(--accent-soft); color: var(--accent); }
 
 /* Shared surfaces used across library pages */
 .own-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--t-fast), box-shadow var(--t-fast);
 }
 
 .own-muted { color: var(--muted); }
@@ -40,15 +60,6 @@ ul { margin: 0; padding: 0; list-style: none; }
 .own-sr-only {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
-}
-
-/* Checkerboard preview stage — matches the original library viewer */
-.own-stage {
-  background:
-    linear-gradient(45deg, transparent 49.5%, var(--border) 49.5%, var(--border) 50.5%, transparent 50.5%),
-    var(--bg);
-  background-size: 22px 22px;
-  border-radius: var(--radius);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -3,6 +3,9 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { isLoggedIn } from './lib/auth.js'
 import { isFirebaseReady } from './lib/firebase.js'
 import { subscribeComplaints, subscribeMessages } from './lib/data.js'
+import { applyTheme, getTheme } from './lib/prefs.js'
+import './own/styles/global.css'
+import './app.css'
 import Login from './pages/Login.jsx'
 import Home from './pages/Home.jsx'
 import AllComplains from './pages/AllComplains.jsx'
@@ -12,7 +15,7 @@ import ChatThread from './pages/ChatThread.jsx'
 import Activity from './pages/Activity.jsx'
 import Setting from './pages/Setting.jsx'
 
-/* ---------------- shared data (ek hi listener dono collections ke liye) --------------- */
+/* ---------------- shared data (single listener for collections) --------------- */
 
 const DataContext = createContext({ complaints: [], messages: [], loading: true, ready: false })
 export const useData = () => useContext(DataContext)
@@ -45,11 +48,16 @@ function RequireAuth({ children }) {
 
   useEffect(() => { setOk(isLoggedIn()) }, [location.pathname])
 
-  if (!ok) return <Navigate to="/login" replace state={{ from: location.pathname }} />
+  const loginPath = location.pathname.startsWith('/admin') ? '/admin/login' : '/login'
+  if (!ok) return <Navigate to={loginPath} replace state={{ from: location.pathname }} />
   return children
 }
 
 export default function App() {
+  useEffect(() => {
+    applyTheme(getTheme())
+  }, [])
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
@@ -66,7 +74,7 @@ export default function App() {
                 <Route path="/chat/:clientId" element={<ChatThread />} />
                 <Route path="/activity" element={<Activity />} />
                 <Route path="/setting" element={<Setting />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="*" element={<Navigate to="" replace />} />
               </Routes>
             </DataProvider>
           </RequireAuth>

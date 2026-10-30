@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import AppShell from '../components/AppShell.jsx'
 import { initialsOf } from '../components/status.js'
 import { Avatar } from '../own/ui/data/Avatar.jsx'
@@ -7,7 +7,7 @@ import KeyValue from '../own/ui/data/KeyValue.jsx'
 import Input from '../own/ui/input/Input.jsx'
 import { Checkbox } from '../own/ui/input/Checkbox.jsx'
 import Button from '../own/ui/button/Button.jsx'
-import { Alert, Chip } from '../own/ui/feedback/Alert.jsx'
+import { Alert } from '../own/ui/feedback/Alert.jsx'
 import { THEMES } from '../own/themes.js'
 import { useData } from '../App.jsx'
 import { applyTheme, getAdminName, getTheme, getVibrate, setAdminName, setVibrate } from '../lib/prefs.js'
@@ -17,6 +17,7 @@ import { APP_NAME, APP_VERSION, DEFAULT_PASSWORD } from '../config.js'
 
 export default function Setting() {
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const { complaints, messages, ready } = useData()
 
   const [name, setName] = useState(getAdminName())
@@ -26,6 +27,8 @@ export default function Setting() {
   const [pass, setPass] = useState('')
   const [pass2, setPass2] = useState('')
   const [passMsg, setPassMsg] = useState({ tone: 'success', text: '' })
+
+  const base = pathname.startsWith('/admin') ? '/admin' : ''
 
   const saveName = (e) => {
     e.preventDefault()
@@ -58,15 +61,16 @@ export default function Setting() {
 
   const doLogout = () => {
     logout()
-    navigate('/login', { replace: true })
+    navigate(base ? `${base}/login` : '/login', { replace: true })
   }
 
   const isDefaultPass = getPassword() === DEFAULT_PASSWORD
 
   return (
     <AppShell title="Setting" subtitle="Admin panel ki settings">
-      <section className="own-card pa-card">
-        <div className="pa-row">
+      {/* Admin Profile Overview */}
+      <section className="pa-card">
+        <div className="pa-row" style={{ gap: 14 }}>
           <Avatar initials={initialsOf(getAdminName(), 'AD')} size="lg" tone="accent" status="online" />
           <div className="own-list__meta">
             <strong>{getAdminName()}</strong>
@@ -76,20 +80,20 @@ export default function Setting() {
         </div>
       </section>
 
-      {/* 1. profile */}
-      <section className="own-card pa-card">
+      {/* 1. Profile Edit */}
+      <section className="pa-card">
         <h2 className="pa-section__title">Profile</h2>
         <form className="pa-stack" onSubmit={saveName}>
           <Input id="admin-name" label="Admin name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Admin" />
           <div className="pa-row">
-            <Button size="sm" type="submit" icon="check">Save</Button>
-            {savedName ? <span className="pa-muted">Save ho gaya ✔</span> : null}
+            <Button size="sm" type="submit" icon="check">Save Name</Button>
+            {savedName ? <span className="pa-muted" style={{ color: 'var(--yes)' }}>Save ho gaya ✔</span> : null}
           </div>
         </form>
       </section>
 
-      {/* 2. security */}
-      <section className="own-card pa-card">
+      {/* 2. Security */}
+      <section className="pa-card">
         <h2 className="pa-section__title">Security</h2>
         <form className="pa-stack" onSubmit={changePass}>
           <Input
@@ -122,52 +126,62 @@ export default function Setting() {
         </p>
       </section>
 
-      {/* 3. theme */}
-      <section className="own-card pa-card">
-        <h2 className="pa-section__title">Theme (OWN Library)</h2>
+      {/* 3. Theme Selector with Visual Swatches */}
+      <section className="pa-card">
+        <h2 className="pa-section__title">Theme Palette</h2>
         <div className="pa-theme-grid">
           {THEMES.map((t) => (
-            <Chip key={t.id} label={t.label} icon="sun" selected={theme === t.id} onClick={() => pickTheme(t.id)} />
+            <button
+              key={t.id}
+              type="button"
+              className={`pa-theme-btn ${theme === t.id ? 'is-active' : ''}`}
+              onClick={() => pickTheme(t.id)}
+            >
+              <span className="pa-theme-swatch" style={{ background: t.swatch[0], borderColor: t.swatch[1] }}>
+                <span className="pa-theme-swatch__dot" style={{ background: t.swatch[1] }} />
+              </span>
+              <span>{t.label}</span>
+            </button>
           ))}
         </div>
       </section>
 
-      {/* 4. notifications */}
-      <section className="own-card pa-card">
+      {/* 4. Notifications */}
+      <section className="pa-card">
         <h2 className="pa-section__title">Notifications</h2>
         <Checkbox label="Nayi complaint pe vibrate" checked={vibrate} onChange={toggleVibrate} />
       </section>
 
-      {/* 5. data */}
-      <section className="own-card pa-card">
-        <h2 className="pa-section__title">Data</h2>
+      {/* 5. Data Stats */}
+      <section className="pa-card">
+        <h2 className="pa-section__title">Data Connection</h2>
         <KeyValue
           rows={[
-            { k: 'Firestore', v: ready ? 'Connected' : 'Not configured' },
-            { k: 'Project', v: firebaseConfig.projectId || '-' },
-            { k: 'Users', v: String(new Set(complaints.map((c) => c.clientId)).size) },
-            { k: 'Complaints', v: String(complaints.length) },
-            { k: 'Chat messages', v: String(messages.length) },
+            { k: 'Firestore Status', v: ready ? 'Connected (Live)' : 'LocalStorage Mode' },
+            { k: 'Project ID', v: firebaseConfig.projectId || '-' },
+            { k: 'Total Unique Users', v: String(new Set(complaints.map((c) => c.clientId)).size) },
+            { k: 'Total Complaints', v: String(complaints.length) },
+            { k: 'Total Chat Messages', v: String(messages.length) },
           ]}
         />
       </section>
 
-      {/* 6. about */}
-      <section className="own-card pa-card">
+      {/* 6. About */}
+      <section className="pa-card">
         <h2 className="pa-section__title">About</h2>
         <KeyValue
           rows={[
-            { k: 'App', v: APP_NAME },
+            { k: 'App Name', v: APP_NAME },
             { k: 'Version', v: APP_VERSION },
-            { k: 'Type', v: 'Mobile admin' },
-            { k: 'UI', v: 'OWN Library' },
+            { k: 'Environment', v: 'Admin Portal' },
+            { k: 'Design System', v: 'OWN Library Modern' },
           ]}
         />
       </section>
 
       <Button variant="danger" fullWidth icon="logout" onClick={doLogout}>Logout</Button>
 
-      <p className="pa-muted pa-center">{APP_NAME} · Parimatch Support admin</p>
+      <p className="pa-muted pa-center">{APP_NAME} · Parimatch Support Admin Portal</p>
     </AppShell>
   )
 }

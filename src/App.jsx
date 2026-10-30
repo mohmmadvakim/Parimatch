@@ -1,11 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { siteRoutes, RouteLoader } from '../Site/src/App'
 import Landing from './pages/Landing'
+import AdminApp from '../P2-A/src/App'
 
 /**
- * Combined local project: marketing Landing at "/" and the full Support
- * Center mounted under /site. The Site pages/components are imported from
- * ../Site/src (single source of truth) with VITE_BASE_PATH=/site.
+ * Combined local project: marketing Landing at "/", full Support
+ * Center mounted under /site, and Admin Panel mounted under /admin.
  */
 export default function App() {
   return (
@@ -14,6 +14,8 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/index.html" element={<Navigate to="/" replace />} />
+        <Route path="/admin/*" element={<AdminApp />} />
+        <Route path="/p2-a/*" element={<AdminApp />} />
         {siteRoutes()}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

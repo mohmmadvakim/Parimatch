@@ -1,4 +1,4 @@
-.own-field { display: flex; flex-direction: column; gap: 6px; max-width: 380px; }
+.own-field { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 100%; }
 .own-field.is-disabled { opacity: 0.6; }
 .own-field__label { font-size: var(--fs-sm); font-weight: 600; color: var(--text); }
 .own-field__control {

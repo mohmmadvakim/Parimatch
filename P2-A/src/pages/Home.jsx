@@ -28,16 +28,21 @@ export default function Home() {
       </section>
 
       <section className="pa-section">
-        <h2 className="pa-section__title">Aaj ke users ({todays.length})</h2>
+        <div className="pa-section__head">
+          <h2 className="pa-section__title">Aaj ke users ({todays.length})</h2>
+          {todays.length > 0 && <span className="pa-muted">{todayCount} complaints today</span>}
+        </div>
 
         {loading ? (
-          <div className="own-card pa-card"><Skeleton lines={3} /></div>
+          <div className="own-card pa-card"><Skeleton lines={4} /></div>
         ) : todays.length === 0 ? (
-          <EmptyState
-            icon="user"
-            title="Aaj koi complaint nahi"
-            text="Aaj ke din abhi koi user complaint nahi aayi. Nayi complaint aate hi yahan turant dikhegi."
-          />
+          <div className="own-card pa-card">
+            <EmptyState
+              icon="user"
+              title="Aaj koi complaint nahi"
+              text="Aaj ke din abhi koi user complaint nahi aayi. Nayi complaint aate hi yahan turant dikhegi."
+            />
+          </div>
         ) : (
           <div className="own-list pa-list">
             {todays.map((u) => (

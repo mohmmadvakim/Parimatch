@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import AppShell from '../components/AppShell.jsx'
 import { Timeline } from '../own/ui/data/Timeline.jsx'
 import EmptyState from '../own/ui/feedback/EmptyState.jsx'
@@ -10,7 +10,10 @@ import { activityFeed, formatDateTime } from '../lib/data.js'
 const toneOf = (kind) => (kind === 'complaint' ? 'accent' : 'success')
 
 export default function Activity() {
+  const { pathname } = useLocation()
   const { complaints, messages, loading } = useData()
+
+  const base = pathname.startsWith('/admin') ? '/admin' : ''
 
   const events = useMemo(
     () =>
@@ -19,12 +22,12 @@ export default function Activity() {
         tone: toneOf(it.kind),
         time: formatDateTime(it.at),
         title: (
-          <Link className="pa-link" to={`/user/${it.clientId}`}>
-            <strong>{it.title}</strong> · {it.subtitle}
+          <Link className="pa-link" to={base ? `${base}/user/${it.clientId}` : `/user/${it.clientId}`}>
+            <strong>{it.title}</strong> · <span>{it.subtitle}</span>
           </Link>
         ),
       })),
-    [complaints, messages]
+    [complaints, messages, base]
   )
 
   return (
@@ -32,9 +35,17 @@ export default function Activity() {
       {loading ? (
         <div className="own-card pa-card"><Skeleton lines={5} /></div>
       ) : events.length === 0 ? (
-        <EmptyState icon="clock" title="Koi activity nahi" text="Jaise hi koi complaint ya message aayega, yahan timeline me dikhega." />
+        <div className="own-card pa-card">
+          <EmptyState
+            icon="clock"
+            title="Koi activity nahi"
+            text="Jaise hi koi complaint ya message aayega, yahan timeline me dikhega."
+          />
+        </div>
       ) : (
-        <Timeline events={events} />
+        <div className="own-card pa-card">
+          <Timeline events={events} />
+        </div>
       )}
     </AppShell>
   )
