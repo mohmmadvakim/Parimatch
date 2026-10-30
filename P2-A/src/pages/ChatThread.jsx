@@ -2,13 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router-dom'
 import AppShell from '../components/AppShell.jsx'
 import { initialsOf } from '../components/status.js'
-import { Avatar } from '../own/ui/data/Avatar.jsx'
-import Input from '../own/ui/input/Input.jsx'
-import IconButton from '../own/ui/button/IconButton.jsx'
-import { Alert } from '../own/ui/feedback/Alert.jsx'
-import EmptyState from '../own/ui/feedback/EmptyState.jsx'
-import { Spinner } from '../own/ui/feedback/Loaders.jsx'
-import { Icon } from '../own/ui/icons/Icons.jsx'
+import { Icon } from '../components/Icons.jsx'
 import { useData } from '../App.jsx'
 import { formatStamp, messagesOf, userNameOf } from '../lib/data.js'
 import { sendSupportMessage } from '../lib/actions.js'
@@ -51,73 +45,110 @@ export default function ChatThread() {
 
   return (
     <AppShell
-      title={name}
-      subtitle={userComplaints.length ? `${userComplaints.length} complaint${userComplaints.length === 1 ? '' : 's'}` : 'No complaints'}
+      title={`Chat · ${name}`}
+      subtitle="Real-time support messaging"
       back
       nav={false}
       right={
-        userComplaints.length ? (
-          <Link className="own-btn own-btn--secondary own-btn--sm" to={userTo}>
+        userComplaints.length > 0 ? (
+          <Link className="btn secondary sm" to={userTo}>
             <Icon name="grid" size={15} />
-            <span>Complains</span>
+            <span>Complaints ({userComplaints.length})</span>
           </Link>
         ) : null
       }
     >
-      <div className="pa-chat">
-        {loading ? (
-          <div className="pa-card pa-center"><Spinner label="Loading conversation…" /></div>
-        ) : rows.length === 0 ? (
-          <div className="pa-card">
-            <EmptyState icon="message" title="Koi message nahi" text="Is user ne abhi koi message nahi bheja." />
-          </div>
-        ) : (
-          rows.map((m) => {
-            const mine = m.sender !== 'user'
-            const stamp = formatStamp(m.createdAt)
-            return (
-              <div key={m.id} className={`pa-bubble-row ${mine ? 'pa-bubble-row--right' : ''}`}>
-                {!mine ? <Avatar initials={initialsOf(name, 'U')} size="sm" tone="neutral" /> : null}
-                <div className={`pa-bubble ${mine ? 'pa-bubble--mine' : 'pa-bubble--theirs'}`}>
-                  {m.text ? <span>{m.text}</span> : null}
-                  {m.file?.name ? (
-                    <span className="pa-muted" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                      <Icon name="folder" size={13} /> {m.file.name}
-                    </span>
-                  ) : null}
-                  <span className="pa-bubble__time">{stamp.time}{m.edited ? ' · edited' : ''}</span>
-                </div>
+      <div className="chat-shell">
+        {/* Chat Topbar */}
+        <div className="chat-topbar">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div className="admin-avatar" style={{ width: 36, height: 36, fontSize: '0.85rem' }}>
+              {initialsOf(name)}
+            </div>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text)' }}>{name}</div>
+              <div style={{ fontSize: '0.74rem', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+                <span>Client ID: {String(clientId || '').slice(0, 8)}</span>
               </div>
-            )
-          })
-        )}
-        <div ref={bottomRef} />
-      </div>
-
-      {error ? (
-        <div className="pa-composer__error">
-          <Alert tone="danger" title="Send fail">{error}</Alert>
+            </div>
+          </div>
         </div>
-      ) : null}
 
-      <form className="pa-composer" onSubmit={send}>
-        <Input
-          id="chat-reply"
-          placeholder="Reply likho…"
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          maxLength={2000}
-          aria-label="Reply"
-          disabled={sending}
-        />
-        <IconButton
-          icon="send"
-          label="Send"
-          variant="primary"
-          type="submit"
-          disabled={!text.trim() || sending}
-        />
-      </form>
+        {/* Message List */}
+        <div className="chat-list">
+          {loading ? (
+            <div className="empty-state" style={{ padding: '30px' }}>
+              <h2>Loading messages…</h2>
+            </div>
+          ) : rows.length === 0 ? (
+            <div className="empty-state" style={{ padding: '30px' }}>
+              <div className="empty-icon">
+                <Icon name="message" size={24} />
+              </div>
+              <p>Is user ne abhi tak koi message nahi bheja hai.</p>
+            </div>
+          ) : (
+            rows.map((m) => {
+              const mine = m.sender !== 'user'
+              const stamp = formatStamp(m.createdAt)
+
+              return (
+                <div key={m.id} className={`chat-bubble-row ${mine ? 'mine' : 'theirs'}`}>
+                  <div className="chat-bubble">
+                    {m.text && <div className="chat-text">{m.text}</div>}
+                    {m.file?.name && (
+                      <div className="chat-file-card" style={{ background: mine ? 'rgba(0,0,0,0.1)' : '#252a36' }}>
+                        <span className="chat-file-icon">
+                          <Icon name="folder" size={16} />
+                        </span>
+                        <div className="chat-file-meta">
+                          <div className="chat-file-name">{m.file.name}</div>
+                        </div>
+                      </div>
+                    )}
+                    <div className="chat-meta">
+                      <span>{stamp.time}</span>
+                      {m.edited && <span>· edited</span>}
+                    </div>
+                  </div>
+                </div>
+              )
+            })
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Error notification */}
+        {error && (
+          <div style={{ background: 'var(--no-soft)', color: 'var(--no)', padding: '8px 14px', fontSize: '0.82rem' }}>
+            {error}
+          </div>
+        )}
+
+        {/* Input Bar matching Parimatch Site */}
+        <form className="chat-inputbar" onSubmit={send}>
+          <input
+            className="chat-input"
+            type="text"
+            placeholder="Type support reply…"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            disabled={sending}
+            maxLength={2000}
+            autoFocus
+          />
+          <button
+            type="submit"
+            className="btn primary"
+            style={{ height: 42, padding: '0 18px' }}
+            disabled={!text.trim() || sending}
+          >
+            <Icon name="send" size={16} />
+            <span>Send</span>
+          </button>
+        </form>
+      </div>
     </AppShell>
   )
 }

@@ -1,19 +1,20 @@
+import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { Icon } from '../own/ui/icons/Icons.jsx'
-import IconButton from '../own/ui/button/IconButton.jsx'
-import { Badge } from '../own/ui/feedback/Alert.jsx'
+import { Icon } from './Icons.jsx'
 import { useData } from '../App.jsx'
 
-const TABS = [
-  { to: '/', label: 'Home', icon: 'home', badgeKey: null },
-  { to: '/all', label: 'Complains', icon: 'grid', badgeKey: 'complaints' },
-  { to: '/chat', label: 'Chat', icon: 'message', badgeKey: 'chat' },
-  { to: '/activity', label: 'Activity', icon: 'clock', badgeKey: null },
-  { to: '/setting', label: 'Setting', icon: 'settings', badgeKey: null },
+const LOGO = '/site/logo/logo.png'
+
+const NAV_ITEMS = [
+  { to: '/', label: 'Home', icon: 'home' },
+  { to: '/all', label: 'All Complains', icon: 'grid', badgeKey: 'complaints' },
+  { to: '/chat', label: 'Live Chat', icon: 'message', badgeKey: 'chat' },
+  { to: '/activity', label: 'Activity', icon: 'clock' },
+  { to: '/setting', label: 'Settings', icon: 'settings' },
 ]
 
-/** Mobile shell — topbar + bottom nav (OWN Library BottomNav classes) */
 export default function AppShell({ title, subtitle, back = false, right = null, children, nav = true }) {
+  const [menuOpen, setMenuOpen] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
   const { complaints = [], messages = [] } = useData()
@@ -23,9 +24,7 @@ export default function AppShell({ title, subtitle, back = false, right = null, 
 
   const isTabActive = (to) => {
     const full = getFullTo(to)
-    if (to === '/') {
-      return pathname === full || pathname === `${full}/`
-    }
+    if (to === '/') return pathname === full || pathname === `${full}/`
     return pathname === full || pathname.startsWith(`${full}/`)
   }
 
@@ -42,60 +41,179 @@ export default function AppShell({ title, subtitle, back = false, right = null, 
   }
 
   return (
-    <div className={`pa-app ${nav ? '' : 'pa-app--no-nav'}`}>
-      <header className="pa-topbar">
-        <div className="pa-topbar__left">
-          {back ? (
-            <IconButton
-              icon="chevron-left"
-              label="Back"
-              variant="plain"
-              size="sm"
-              onClick={() => navigate(-1)}
-            />
-          ) : (
-            <span className="pa-brand">
-              <span className="pa-brand__badge">P2</span>
-              <span>Admin</span>
-            </span>
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: 'var(--bg)' }}>
+      {/* Parimatch Header */}
+      <header className="page-header">
+        <div className="header-inner">
+          <Link className="header-brand" to={getFullTo('/')}>
+            <img className="logo-icon" src={LOGO} alt="Parimatch logo" />
+            <div className="logo-text">
+              <span>Parimatch</span>
+              <span className="admin-tag">Admin</span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation Links */}
+          {nav && (
+            <nav className="header-nav" aria-label="Desktop Admin Navigation">
+              {NAV_ITEMS.map(({ to, label, icon, badgeKey }) => {
+                const count = badgeKey ? getBadgeCount(badgeKey) : null
+                const active = isTabActive(to)
+                return (
+                  <Link
+                    key={to}
+                    to={getFullTo(to)}
+                    className={`header-nav-link ${active ? 'active' : ''}`}
+                  >
+                    <Icon name={icon} size={16} />
+                    <span>{label}</span>
+                    {count != null && <span className="nav-badge">{count}</span>}
+                  </Link>
+                )
+              })}
+            </nav>
           )}
 
-          <div className="pa-topbar__text">
-            <h1>{title}</h1>
-            {subtitle ? <p>{subtitle}</p> : null}
-          </div>
-        </div>
+          <div className="header-actions">
+            {back ? (
+              <button
+                type="button"
+                className="btn secondary sm"
+                onClick={() => navigate(-1)}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+              >
+                <Icon name="chevron-left" size={16} />
+                <span>Back</span>
+              </button>
+            ) : (
+              <span className="badge success" style={{ background: 'rgba(53, 201, 139, 0.15)', color: '#35c98b' }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
+                Live
+              </span>
+            )}
 
-        <div>
-          {right || (back ? null : <Badge tone="success" dot>Live</Badge>)}
+            {nav && (
+              <button
+                className="menu-btn"
+                type="button"
+                aria-label="Open menu"
+                onClick={() => setMenuOpen(true)}
+              >
+                <Icon name="menu" size={20} />
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
-      <main className="pa-screen">{children}</main>
+      {/* Mobile Drawer Menu */}
+      {nav && (
+        <>
+          <div className={`menu-overlay ${menuOpen ? 'open' : ''}`} onClick={() => setMenuOpen(false)} />
+          <nav className={`side-menu ${menuOpen ? 'open' : ''}`} aria-label="Mobile Navigation">
+            <div className="side-menu-head">
+              <img src={LOGO} alt="" />
+              <span>Parimatch Admin</span>
+              <button className="side-close" type="button" aria-label="Close" onClick={() => setMenuOpen(false)}>
+                <Icon name="x" size={16} />
+              </button>
+            </div>
+            {NAV_ITEMS.map((item) => {
+              const count = item.badgeKey ? getBadgeCount(item.badgeKey) : null
+              return (
+                <Link
+                  key={item.to}
+                  className={`side-link ${isTabActive(item.to) ? 'active' : ''}`}
+                  to={getFullTo(item.to)}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <Icon name={item.icon} size={18} />
+                    <span>{item.label}</span>
+                  </span>
+                  {count != null && <span className="nav-badge">{count}</span>}
+                </Link>
+              )
+            })}
+          </nav>
+        </>
+      )}
 
-      {nav ? (
-        <nav className="own-bottomnav pa-bottomnav" aria-label="Main navigation">
-          {TABS.map(({ to, label, icon, badgeKey }) => {
-            const fullTo = getFullTo(to)
-            const active = isTabActive(to)
+      {/* Main Container */}
+      <main className="container">
+        {title && (
+          <div className="card panel" style={{ marginBottom: 4 }}>
+            <div className="panel-head">
+              <div>
+                <h1 className="page-title">{title}</h1>
+                {subtitle && <p className="page-sub">{subtitle}</p>}
+              </div>
+              {right}
+            </div>
+          </div>
+        )}
+        {children}
+      </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      {nav && (
+        <nav className="admin-bottom-nav" aria-label="Mobile Bottom Nav">
+          {NAV_ITEMS.map(({ to, label, icon, badgeKey }) => {
             const count = badgeKey ? getBadgeCount(badgeKey) : null
+            const active = isTabActive(to)
             return (
               <Link
                 key={to}
-                to={fullTo}
-                className={`own-bottomnav__item ${active ? 'is-active' : ''}`}
-                aria-current={active ? 'page' : undefined}
+                to={getFullTo(to)}
+                className={`admin-nav-item ${active ? 'active' : ''}`}
               >
-                <span className="own-bottomnav__icon">
+                <div style={{ position: 'relative' }}>
                   <Icon name={icon} size={20} />
-                  {count != null && <span className="own-bottomnav__badge">{count}</span>}
-                </span>
-                <span className="own-bottomnav__label">{label}</span>
+                  {count != null && (
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: -5,
+                        right: -8,
+                        minWidth: 15,
+                        height: 15,
+                        padding: '0 3px',
+                        borderRadius: 999,
+                        background: 'var(--accent)',
+                        color: '#16181e',
+                        fontSize: '0.6rem',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </div>
+                <span>{label}</span>
               </Link>
             )
           })}
         </nav>
-      ) : null}
+      )}
+
+      {/* Parimatch Footer */}
+      <footer className="admin-footer">
+        <div className="footer-main">
+          <p>&copy; 2026 Parimatch Support · Admin Control Center</p>
+          <nav className="footer-nav">
+            <Link to={getFullTo('/')}>Home</Link>
+            <span className="sep">·</span>
+            <Link to={getFullTo('/all')}>Complains</Link>
+            <span className="sep">·</span>
+            <Link to={getFullTo('/chat')}>Chat</Link>
+            <span className="sep">·</span>
+            <Link to={getFullTo('/setting')}>Settings</Link>
+          </nav>
+        </div>
+      </footer>
     </div>
   )
 }

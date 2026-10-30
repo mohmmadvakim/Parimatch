@@ -3,8 +3,6 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { isLoggedIn } from './lib/auth.js'
 import { isFirebaseReady } from './lib/firebase.js'
 import { subscribeComplaints, subscribeMessages } from './lib/data.js'
-import { applyTheme, getTheme } from './lib/prefs.js'
-import './own/styles/global.css'
 import './app.css'
 import Login from './pages/Login.jsx'
 import Home from './pages/Home.jsx'
@@ -54,10 +52,6 @@ function RequireAuth({ children }) {
 }
 
 export default function App() {
-  useEffect(() => {
-    applyTheme(getTheme())
-  }, [])
-
   return (
     <Routes>
       <Route path="/login" element={<Login />} />

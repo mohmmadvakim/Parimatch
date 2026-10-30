@@ -1,26 +1,32 @@
-import Modal from '../own/ui/feedback/Modal.jsx'
-import Button from '../own/ui/button/Button.jsx'
+import { Icon } from './Icons.jsx'
 
-/** Attachment popup — OWN Library Modal */
 export default function FileViewer({ open, src, name, onClose }) {
   if (!open || !src) return null
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      title={name || 'Attachment'}
-      size="lg"
-      footer={
-        <div className="pa-spread">
-          <a className="own-btn own-btn--ghost own-btn--sm" href={src} target="_blank" rel="noopener">
+    <div className="modal-overlay" onClick={onClose} role="dialog" aria-modal="true">
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-head">
+          <h3>{name || 'Attachment Preview'}</h3>
+          <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
+            <Icon name="x" size={20} />
+          </button>
+        </div>
+
+        <div className="modal-body">
+          <img src={src} alt={name || 'Attachment'} />
+        </div>
+
+        <div className="modal-foot">
+          <a className="btn secondary sm" href={src} target="_blank" rel="noopener noreferrer">
+            <Icon name="eye" size={15} />
             <span>Open in new tab</span>
           </a>
-          <Button size="sm" onClick={onClose}>Close</Button>
+          <button type="button" className="btn primary sm" onClick={onClose}>
+            Close
+          </button>
         </div>
-      }
-    >
-      <img className="pa-viewer-img" src={src} alt={name || 'Attachment'} />
-    </Modal>
+      </div>
+    </div>
   )
 }

@@ -3,18 +3,12 @@ import { Link, useLocation, useParams } from 'react-router-dom'
 import AppShell from '../components/AppShell.jsx'
 import FileViewer from '../components/FileViewer.jsx'
 import { prettyLabel, statusLabel, statusTone, initialsOf } from '../components/status.js'
-import { Avatar } from '../own/ui/data/Avatar.jsx'
-import KeyValue from '../own/ui/data/KeyValue.jsx'
-import Button from '../own/ui/button/Button.jsx'
-import { Badge } from '../own/ui/feedback/Alert.jsx'
-import EmptyState from '../own/ui/feedback/EmptyState.jsx'
-import { Spinner } from '../own/ui/feedback/Loaders.jsx'
-import { Icon } from '../own/ui/icons/Icons.jsx'
+import { Icon } from '../components/Icons.jsx'
 import { useData } from '../App.jsx'
 import { complaintsOf, fileSrc, formatDateTime, formatFileSize, isImageFile, userNameOf } from '../lib/data.js'
 import { updateComplaintStatus } from '../lib/actions.js'
 
-const STATUS_OPTIONS = [
+const STATUS_CHOICES = [
   { id: 'pending', label: 'Pending', icon: 'clock' },
   { id: 'resolved', label: 'Resolved', icon: 'check-circle' },
   { id: 'rejected', label: 'Rejected', icon: 'x-circle' },
@@ -50,36 +44,48 @@ export default function UserDetail() {
   return (
     <AppShell
       title={name}
-      subtitle={`${rows.length} complaint${rows.length === 1 ? '' : 's'}`}
+      subtitle={`${rows.length} total complaint${rows.length === 1 ? '' : 's'}`}
       back
       nav={false}
+      right={
+        <Link className="btn primary sm" to={chatTo}>
+          <Icon name="message" size={16} />
+          <span>Live Chat{chatCount ? ` (${chatCount})` : ''}</span>
+        </Link>
+      }
     >
-      {/* Top User Profile Card */}
-      <section className="pa-card">
-        <div className="pa-spread">
-          <div className="pa-row" style={{ gap: 14 }}>
-            <Avatar initials={initialsOf(name)} size="lg" tone="accent" />
-            <div className="own-list__meta">
-              <strong>{name}</strong>
-              <span>{mobile || 'Mobile not provided'}</span>
-              {email ? <span>{email}</span> : null}
-              <span className="pa-muted">ID: {String(clientId || '').slice(0, 8)}</span>
+      {/* Top Profile Card */}
+      <div className="card panel">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+            <div className="admin-avatar" style={{ width: 52, height: 52, fontSize: '1.2rem' }}>
+              {initialsOf(name)}
+            </div>
+            <div>
+              <h2 style={{ fontSize: '1.2rem', fontWeight: 700, color: 'var(--text)' }}>{name}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', marginTop: 4, color: 'var(--muted)', fontSize: '0.85rem' }}>
+                {mobile ? <span>📱 {mobile}</span> : <span>Mobile: Not provided</span>}
+                {email && <span>✉️ {email}</span>}
+                <span style={{ fontVariantNumeric: 'tabular-nums' }}>ID: {String(clientId || '').slice(0, 10)}</span>
+              </div>
             </div>
           </div>
-
-          <Link className="own-btn own-btn--secondary own-btn--sm" to={chatTo}>
-            <Icon name="message" size={15} />
-            <span>Chat{chatCount ? ` (${chatCount})` : ''}</span>
-          </Link>
         </div>
-      </section>
+      </div>
 
-      {/* Complaints List */}
+      {/* Complaints List in Parimatch Site Card Design */}
       {loading ? (
-        <div className="pa-card pa-center"><Spinner label="Loading user complaints…" /></div>
+        <div className="card empty-state">
+          <h2>Loading…</h2>
+          <p>Fetching user details.</p>
+        </div>
       ) : rows.length === 0 ? (
-        <div className="pa-card">
-          <EmptyState icon="grid" title="Koi complaint nahi" text="Is user ki koi complaint nahi mili." />
+        <div className="card empty-state">
+          <div className="empty-icon">
+            <Icon name="grid" size={28} />
+          </div>
+          <h2>Koi complaint nahi hai</h2>
+          <p>Is user ID se koi complaint darj nahi mili.</p>
         </div>
       ) : (
         rows.map((c) => {
@@ -87,84 +93,126 @@ export default function UserDetail() {
           const details = Object.entries(c.details || {}).filter(
             ([k]) => !['userName', 'user_name', 'password'].includes(k)
           )
-          const kv = details.map(([k, v]) => ({ k: prettyLabel(k), v: String(v) }))
-          if (c.hasPassword) kv.push({ k: 'Password', v: '•••••••• (secured)' })
-
           const currentStatus = String(c.status || 'pending').toLowerCase()
 
           return (
-            <article key={c.id} className="pa-card">
-              <div className="pa-card__head">
-                <span className="pa-card__title">{c.title || `${c.type || 'Complain'} complaint`}</span>
-                <div className="pa-badges">
-                  <Badge tone="accent">{c.type || 'Complain'}</Badge>
-                  <Badge tone={statusTone(c.status)}>{statusLabel(c.status)}</Badge>
-                </div>
+            <div key={c.id} className="card complain-item">
+              {/* Corner Status Pill (Parimatch Site signature design) */}
+              <span className={`complain-status ${statusTone(c.status)}`}>
+                {statusLabel(c.status)}
+              </span>
+
+              <div className="complain-item-head">
+                <span className="badge accent">{c.type || 'Complain'}</span>
+                <span className="complain-item-date">{formatDateTime(c.createdAt)}</span>
               </div>
 
-              <p className="pa-muted">{formatDateTime(c.createdAt)}</p>
+              <h3 className="complain-item-title">{c.title || `${c.type || 'Complain'} Complaint`}</h3>
 
-              <KeyValue rows={kv.length ? kv : [{ k: 'Details', v: '-' }]} />
+              {/* Details Grid (Parimatch Site 2-column key-value grid) */}
+              <div className="complain-details-grid">
+                {details.map(([key, value]) => (
+                  <div key={key} className="complain-detail">
+                    <span className="complain-detail-label">{prettyLabel(key)}</span>
+                    <span className="complain-detail-value">{String(value || '-')}</span>
+                  </div>
+                ))}
+                {c.hasPassword && (
+                  <div className="complain-detail">
+                    <span className="complain-detail-label">Password</span>
+                    <span className="complain-detail-value">•••••••• <small style={{ color: 'var(--muted)' }}>(secured)</small></span>
+                  </div>
+                )}
+                {details.length === 0 && !c.hasPassword && (
+                  <div className="complain-detail">
+                    <span className="complain-detail-label">Details</span>
+                    <span className="complain-detail-value">-</span>
+                  </div>
+                )}
+              </div>
 
-              {/* Attachments Section */}
+              {/* Uploaded Files Section */}
               {files.length > 0 && (
-                <div className="pa-stack" style={{ gap: 8 }}>
-                  <span className="pa-section__title">Attachments ({files.length})</span>
-                  {files.map(([key, f]) => {
-                    const src = fileSrc(f)
-                    const label = prettyLabel(key)
-                    return (
-                      <div key={key} className="pa-file">
-                        <span className="pa-file__icon"><Icon name="folder" size={16} /></span>
-                        <span className="pa-file__meta">
-                          <span className="pa-file__name">{label}</span>
-                          <span className="pa-file__sub">
-                            {f.name}{f.size ? ` • ${formatFileSize(f.size)}` : ''}
+                <div className="complain-files">
+                  <div className="complain-files-title">Attachments ({files.length})</div>
+                  <div className="complain-file-list">
+                    {files.map(([key, f]) => {
+                      const src = fileSrc(f)
+                      const label = prettyLabel(key)
+                      return (
+                        <div key={key} className="complain-file-row">
+                          <span className="complain-file-icon">
+                            <Icon name="folder" size={17} />
                           </span>
-                        </span>
-                        {src ? (
-                          isImageFile(f) ? (
-                            <Button size="sm" variant="secondary" icon="eye" onClick={() => setViewer({ src, name: f.name || label })}>
-                              View
-                            </Button>
+                          <span className="complain-file-meta">
+                            <span className="complain-file-name">{label}</span>
+                            <span className="complain-file-sub">
+                              {f.name}{f.size ? ` • ${formatFileSize(f.size)}` : ''}
+                            </span>
+                          </span>
+                          {src ? (
+                            isImageFile(f) ? (
+                              <button
+                                type="button"
+                                className="btn secondary sm"
+                                onClick={() => setViewer({ src, name: f.name || label })}
+                              >
+                                <Icon name="eye" size={15} />
+                                <span>View</span>
+                              </button>
+                            ) : (
+                              <a
+                                className="btn secondary sm"
+                                href={src}
+                                download={f.name}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Open
+                              </a>
+                            )
                           ) : (
-                            <a className="own-btn own-btn--secondary own-btn--sm" href={src} download={f.name} target="_blank" rel="noopener">
-                              Open
-                            </a>
-                          )
-                        ) : (
-                          <span className="pa-muted">N/A</span>
-                        )}
-                      </div>
-                    )
-                  })}
+                            <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>N/A</span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               )}
 
-              {/* Status Action Buttons */}
-              <div className="pa-stack" style={{ gap: 8 }}>
-                <span className="pa-section__title">Update Status</span>
-                <div className="pa-chip-row">
-                  {STATUS_OPTIONS.map((s) => {
-                    const isSelected = currentStatus === s.id
-                    return (
-                      <button
-                        key={s.id}
-                        type="button"
-                        className={`pa-status-chip ${isSelected ? `is-active-${s.id}` : ''}`}
-                        onClick={() => savingId !== c.id && changeStatus(c.id, s.id)}
-                        disabled={savingId === c.id}
-                      >
-                        <Icon name={s.icon} size={14} />
-                        <span>{s.label}</span>
-                        {isSelected && <Icon name="check" size={12} />}
-                      </button>
-                    )
-                  })}
+              {/* Status Update Actions */}
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '14px', marginTop: '4px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase' }}>
+                      Change Status:
+                    </span>
+                    <div className="status-btn-group" style={{ margin: 0 }}>
+                      {STATUS_CHOICES.map((s) => {
+                        const isSelected = currentStatus === s.id
+                        return (
+                          <button
+                            key={s.id}
+                            type="button"
+                            className={`status-choice-btn ${isSelected ? `active-${s.id}` : ''}`}
+                            onClick={() => savingId !== c.id && changeStatus(c.id, s.id)}
+                            disabled={savingId === c.id}
+                          >
+                            <Icon name={s.icon} size={15} />
+                            <span>{s.label}</span>
+                            {isSelected && <Icon name="check" size={14} />}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                  {savingId === c.id && (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--accent)' }}>Updating…</span>
+                  )}
                 </div>
-                {savingId === c.id ? <span className="pa-muted">Updating status…</span> : null}
               </div>
-            </article>
+            </div>
           )
         })
       )}
